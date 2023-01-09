@@ -1,6 +1,6 @@
 import { INestApplication, ValidationPipe } from "@nestjs/common";
 import { Test } from "@nestjs/testing"
-import { PrismaService } from "../src/prisma";
+import { PrismaService } from "../src/prisma/prisma.service";
 import { AppModule } from "../src/app.module";
 import * as pactum from "pactum";
 import { AuthDto } from "src/auth/dto";
@@ -39,14 +39,14 @@ describe("App e2e", () => {
         return pactum
           .spec()
           .post("/auth/signup")
-          .withBody({password: dto.password})
+          .withBody({ password: dto.password })
           .expectStatus(400)
       })
       it("should throw if password empty", () => {
         return pactum
           .spec()
           .post("/auth/signup")
-          .withBody({email: dto.email})
+          .withBody({ email: dto.email })
           .expectStatus(400)
       })
       it("should throw if no body provided", () => {
@@ -68,14 +68,14 @@ describe("App e2e", () => {
         return pactum
           .spec()
           .post("/auth/signin")
-          .withBody({password: dto.password})
+          .withBody({ password: dto.password })
           .expectStatus(400)
       })
       it("should throw if password empty", () => {
         return pactum
           .spec()
           .post("/auth/signin")
-          .withBody({email: dto.email})
+          .withBody({ email: dto.email })
           .expectStatus(400)
       })
       it("should throw if no body provided", () => {
@@ -90,18 +90,34 @@ describe("App e2e", () => {
           .post("/auth/signin")
           .withBody(dto)
           .expectStatus(201)
+          .stores("userAt", "access_token")
       })
     })
   });
-});
+
+
+
 describe("User", () => {
-  describe("Get me", () => { });
+  
+  describe("Get me", () => {
+    it("should get current user", () => {
+      return pactum
+        .spec()
+        .get("/users/me")
+        .withHeaders({
+          Authorization: 'Bearer $S{userAt}'
+        })
+        .expectStatus(200)
+    })
+  });
   describe("Edit user", () => { });
 });
 describe("Bookmarks", () => {
   describe("Create bookmark", () => { });
   describe("Get bookmarks", () => { });
   describe("Get bookmark by id", () => { });
-  describe("Edit bookmark", () => { });
-  describe("Delete bookmark", () => { });
+  describe("Edit bookmark by id", () => { });
+  describe("Delete bookmark by id", () => { });
+});
+
 });
